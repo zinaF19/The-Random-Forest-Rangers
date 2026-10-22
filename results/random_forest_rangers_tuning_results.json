@@ -1,0 +1,39 @@
+{
+  "created": "2026-10-22, full run of Micheal_ML_Team_Data_Baselines.ipynb",
+  "searches": {
+    "Logistic regression": {
+      "best_params": {
+        "logisticregression__C": 1.1435780278433403,
+        "logisticregression__class_weight": null
+      },
+      "best_cv_pr_auc": 0.2598,
+      "search_seconds": 72,
+      "n_iter": 15
+    },
+    "Random forest": {
+      "best_params": {
+        "randomforestclassifier__class_weight": null,
+        "randomforestclassifier__max_depth": 12,
+        "randomforestclassifier__max_features": 0.3,
+        "randomforestclassifier__max_samples": 0.6,
+        "randomforestclassifier__min_samples_leaf": 13
+      },
+      "best_cv_pr_auc": 0.264,
+      "search_seconds": 1240,
+      "n_iter": 15
+    },
+    "Gradient boosting": {
+      "best_params": {
+        "histgradientboostingclassifier__class_weight": "balanced",
+        "histgradientboostingclassifier__l2_regularization": 0.044070507657925036,
+        "histgradientboostingclassifier__learning_rate": 0.021581455374349388,
+        "histgradientboostingclassifier__max_features": 0.6070427488160098,
+        "histgradientboostingclassifier__max_leaf_nodes": 15,
+        "histgradientboostingclassifier__min_samples_leaf": 422
+      },
+      "best_cv_pr_auc": 0.269,
+      "search_seconds": 1522,
+      "n_iter": 40
+    }
+  }
+}
