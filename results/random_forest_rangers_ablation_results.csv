@@ -1,0 +1,11 @@
+experiment,features,CV PR-AUC,PR-AUC std,CV F1,threshold,PR-AUC change,F1 change
+All features (C + interactions),35,0.2689,0.0044,0.3392,0.5236,0.0000,0.0000
+Set C (no interactions),28,0.2690,0.0048,0.3391,0.5289,0.0001,-0.0001
+All minus Urban-rural,32,0.2650,0.0036,0.3358,0.5170,-0.0039,-0.0034
+All minus Participants,25,0.2574,0.0034,0.3271,0.4984,-0.0115,-0.0121
+All minus Time,29,0.2666,0.0041,0.3373,0.5134,-0.0023,-0.0019
+All minus Conditions,33,0.2665,0.0053,0.3377,0.5118,-0.0024,-0.0015
+All minus Location,32,0.2682,0.0047,0.3389,0.5250,-0.0007,-0.0003
+All minus Region keys,33,0.2685,0.0040,0.3389,0.5115,-0.0003,-0.0003
+All minus State age shares,33,0.2693,0.0045,0.3400,0.5267,0.0004,0.0008
+All minus Redundant single_type,34,0.2687,0.0044,0.3395,0.5123,-0.0002,0.0003
