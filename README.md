@@ -1,4 +1,3 @@
-
 ![The Random Forest Rangers](images/project_banner.png)
 
 # Which Road Accidents End Badly? Predicting Severe Injury Accidents in Germany (2025)
@@ -32,6 +31,8 @@ When an injury accident happens on a German road, how likely is it that someone 
 - **City vs countryside is the strongest factor:** 11.3 % of accidents are severe in cities, 16.2 % in towns and 24.3 % in rural areas, in every one of the 16 states. Most of the gap comes from the *same kind* of accident being more severe in rural areas, most likely because of higher speeds.
 - **Who is involved matters next:** motorcycles 24.8 % severe (about 35 % on rural roads), trucks 21.0 %, pedestrians 19.2 %; accidents with a car are less often severe (13.7 %).
 - **Time:** night (peak 26.3 % at 03:00) and weekends (Sunday 19.8 %) are riskier.
+
+![Severe accidents by area type and state](images/plots/01_state_urban_rural_severity.png)
 
 ## Results
 
@@ -67,29 +68,20 @@ When an injury accident happens on a German road, how likely is it that someone 
 
 ## Repository Structure
 
-| File | Owner | Content |
+| Folder / File | Owner | Content |
 |---|---|---|
-| `Micheal_ML_Random_Forest_Rangers_Final.ipynb` | Micheal | Team notebook: business case, EDA, baselines, three models, tuning, ensembles, ablation, calibration, error analysis, post-accident reference |
-| `Micheal_Accident_Locations_2025_ML_Project.ipynb` | Micheal | First EDA and baseline model |
-| `zb01.ipynb` | Zina | EDA and merge of Unfallatlas with Destatis municipality data → shared dataset |
-| `zb02.ipynb` | Zina | Population by state and age (Destatis GENESIS) |
-| `zb03.ipynb` | Zina | First Scenario C models and the effect of population density |
-| `zb04.ipynb` | Zina | State-level EDA: population, age groups, urbanisation, accident kinds |
-| **`zb05.ipynb`** | Zina | **Final model:** urbanisation vs density, baselines, four models, tuning, calibration, error analysis and the final test |
-| `01_jishnu_EDA02.ipynb` | Jishnu | Detailed EDA |
-| `Jishnu_eda_baseline.ipynb` | Jishnu | EDA and historical scenario baseline |
-| `02_jishnu_modeling.ipynb`, `03_jishnu_modeling.ipynb` | Jishnu | Probability models, tuning, calibration, error analysis |
-| `tiziano_eda.ipynb` | Tiziano | EDA on the raw data |
-| `tiziano_splits.ipynb` | Tiziano | Train / validation / test split (70 / 15 / 15) → `data/splits/` |
-| `tiziano_baselines.ipynb` | Tiziano | Linear baselines |
-| `tiziano_ensembles.ipynb` | Tiziano | Bagging, boosting, voting and stacking |
-| `tiziano_augmented.ipynb` | Tiziano | Educated guesses for speed, road type, helmet and seatbelt |
-| `tiziano_pca.ipynb` | Tiziano | PCA before gradient boosting |
-| `presentation/` | | Slide deck for the 10-minute presentation |
+| **`notebooks/final/zb05.ipynb`** | Zina | **Final model:** urbanisation vs density, baselines, four models, tuning, calibration, error analysis and the final test |
+| `notebooks/final/Micheal_ML_Random_Forest_Rangers_Final.ipynb` | Micheal | Team notebook: business case, EDA, baselines, three models, tuning, ensembles, ablation, calibration, error analysis, post-accident reference |
+| `notebooks/zina/` | Zina | `zb01` data merge → shared dataset · `zb02` population by age · `zb03` first Scenario C models · `zb04` state-level EDA |
+| `notebooks/micheal/` | Micheal | First EDA and baseline model |
+| `notebooks/jishnu/` | Jishnu | Detailed EDA, historical scenario baseline, probability models, calibration, error analysis |
+| `notebooks/tiziano/` | Tiziano | EDA, train/validation/test split, baselines, ensembles, educated-guess features, PCA |
+| `presentation/` | | Final slide deck (PDF + PowerPoint); first draft in `presentation/draft/` |
+| `images/` | | Project banner and plots (`images/plots/`) |
 | `data/` | | Raw and processed data, splits |
 | `models/` | | Saved model from Micheal's notebook |
 | `results/` | | Saved tuning and ablation results |
-| `01_assignment.md`, `02_kanban_board.md`, `03_eda-and-modeling.ipynb` | | Course template files |
+| `course/` | | Course template files (assignment, Kanban board guide, example notebook) |
 
 ## Setup and Reproduction
 
@@ -102,4 +94,4 @@ uv sync
 code .
 ```
 
-Open the notebooks from the project root and select the `.venv` kernel. To reproduce the final result, run `zb05.ipynb` (it uses `data/accidents_2025_with_population.csv`, `data/city_accidents_2025.csv` and `data/splits/`; about 30 minutes). The final test runs only with `RUN_TEST = True`.
+Open the project folder in VS Code and select the `.venv` kernel. The notebooks run from the repo root (set in `.vscode/settings.json`), so `data/...` paths work from every folder. To reproduce the final result, run `notebooks/final/zb05.ipynb` (it uses `data/accidents_2025_with_population.csv`, `data/city_accidents_2025.csv` and `data/splits/`; about 30 minutes). The final test runs only with `RUN_TEST = True`.
