@@ -1,152 +1,105 @@
-# Machine Learning Project Template
 
-A starting point for your team machine learning project. The repository ships an example notebook that trains a simple model with minimal cleaning and feature selection. Use it as scaffolding, then build your own project on top of it.
+![The Random Forest Rangers](images/project_banner.png)
 
-The example uses the [coffee quality dataset](https://github.com/jldbc/coffee-quality-database).
+# Which Road Accidents End Badly? Predicting Severe Injury Accidents in Germany (2025)
 
-## Learning Objectives
+**Team: The Random Forest Rangers**: Britt Schulze-Adesida · Jishnu Vasudevan · Micheal Eshak · Tiziano Cocciò · Zina Beek
 
-By the end of this repository, you should be able to:
+When an injury accident happens on a German road, how likely is it that someone is **killed or seriously injured**? We use all police-recorded injury accidents from 2025 (Unfallatlas) together with official municipality data from Destatis to estimate this risk, using **only information that is known before an accident happens**.
 
-- Work on a data science project as a team, sharing the work across the data science lifecycle.
-- Frame a business problem as a machine learning task and choose a performance metric that fits the value you want to create.
-- Build a baseline model, then iterate with error analysis and at least three algorithms (including cross validation and hyperparameter tuning).
-- Communicate your findings and recommendations to a non-technical audience in a short presentation.
+## Business Case (Scenario C)
 
-## Learning Path
-
-Your project follows the data science lifecycle:
-
-```mermaid
-flowchart LR
-    A[Data] --> B[EDA]
-    B --> C[Baseline model]
-    C --> D[Error analysis and iteration]
-    D --> E[Stakeholder presentation]
-```
-
-Start with the assignment, set up your board, then use the example notebook as a reference:
-
-| File / Folder | Description |
+| | |
 |---|---|
-| [**Assignment**](01_assignment.md) | The project brief: timeline, milestones, project options, deliverables, and things to think about. |
-| [**Kanban Board**](02_kanban_board.md) | Step-by-step setup of a GitHub project board to plan and track your work. |
-| [**EDA and Modeling**](03_eda-and-modeling.ipynb) | Worked example of selecting features, doing minimal cleaning, and training a simple model. |
+| **Stakeholders** | Municipal road planners, road-safety authorities, navigation and warning apps |
+| **Question** | *If* an injury accident happens with these road users, at this place, time and conditions, how likely is it to be **severe**? |
+| **Target** | `severe` = 1 if someone was killed or seriously injured (15.7 % of accidents), 0 if only slightly injured |
+| **Metric** | **F1 score** for the severe class (with precision, recall and PR-AUC). Accuracy is misleading: always saying "not severe" is 84 % correct. |
+| **Not used** | `accident_kind` and `accident_type`: they describe *how* the accident happened and are only known afterwards (leakage for prevention) |
 
-### Additional Folders and Files
+## Data
 
-| File / Folder | Description |
+| Source | Content |
 |---|---|
-| [**Data**](data/) | Where your datasets go. |
-| [**Models**](models/) | Where trained models are saved. |
-| [**Assets**](assets/) | Screenshots used in the Kanban board guide. |
-| [**pyproject.toml**](pyproject.toml) | Project configuration and dependencies. |
-| [**uv.lock**](uv.lock) | Dependency lock file. |
+| [Unfallatlas 2025](https://unfallatlas.statistikportal.de/) (Statistische Ämter des Bundes und der Länder) | Every accident with personal injury: place, time, light, road surface, road users, severity. Column guide: `data/DSB_Unfallatlas_EN.pdf` |
+| [Destatis Gemeindeverzeichnis](https://www.destatis.de/DE/Themen/Laender-Regionen/Regionales/Gemeindeverzeichnis/_inhalt.html) (31.12.2025) | Population, area, density and official degree of urbanisation (urban / towns / rural) per municipality |
+| [Destatis GENESIS 12411-0014](https://genesis.destatis.de/datenbank/online?sequenz=tabelleErgebnis&selectionname=12411-0014) | Population per state by age (used for the state-level EDA) |
 
-## Setup
+**Shared team dataset:** `data/accidents_2025_with_population.csv`: **272,812 accidents × 41 columns**. 195 accidents (0.07 %) could not be matched to a municipality, mostly in uninhabited areas, and were left out.
 
-> [!NOTE]
-> Throughout these steps, text in angle brackets like `<repo-name>` is a **placeholder**. Replace it, including the `< >` brackets, with your own value. For example, `cd <repo-name>` becomes `cd my-ml-project`.
+## Key Findings
 
-### 1. Create the Repository from the Template
+- **City vs countryside is the strongest factor:** 11.3 % of accidents are severe in cities, 16.2 % in towns and 24.3 % in rural areas, in every one of the 16 states. Most of the gap comes from the *same kind* of accident being more severe in rural areas, most likely because of higher speeds.
+- **Who is involved matters next:** motorcycles 24.8 % severe (about 35 % on rural roads), trucks 21.0 %, pedestrians 19.2 %; accidents with a car are less often severe (13.7 %).
+- **Time:** night (peak 26.3 % at 03:00) and weekends (Sunday 19.8 %) are riskier.
 
-Click **Use this template** on GitHub.
+## Results
 
-When creating the repository:
+**Final model:** tuned gradient boosting (`zb05.ipynb`), 20 features known before an accident (road users, place incl. population density, time, light and road surface). Chosen by cross-validated PR-AUC on the training data (0.267); threshold 0.167 from out-of-fold predictions.
 
-- Set yourself as the **Owner**
-- Choose a repository name
-- Disable **Include all branches**
-- Click **Create repository**
+| Approach | Validation F1 | Test F1 (used once) | Test PR-AUC |
+|---|---|---|---|
+| Baseline: simple rule (motorcycle, pedestrian or no car) | 0.303 | 0.300 | – |
+| Baseline: historical scenario lookup | 0.315 | 0.312 | 0.223 |
+| Logistic regression | 0.334 | | |
+| Decision tree | 0.326 | | |
+| Random forest (tuned) | 0.340 | | |
+| **Gradient boosting (tuned): final model** | **0.346** | **0.339** (95 % range 0.332–0.347) | **0.268** |
+| Stacking ensemble (`Micheal_ML_Random_Forest_Rangers_Final.ipynb`) | 0.344 | | |
 
-> [!IMPORTANT]
-> If you are working in pairs or groups, only **one person** should complete this step.
+- **Test set (40,927 accidents, used once):** the final model beats the rule by **+0.039** (95 % range 0.033–0.046) and the historical lookup by **+0.027**. It finds **58 %** of severe accidents; about **1 in 4** flagged accidents is really severe (average: 1 in 6). Validation 0.346 → test 0.339: stable on unseen data.
+- In the 10 % highest-risk accidents, **1 in 3** is severe (historical lookup: 27 %).
+- All team notebooks reach the same level (**F1 ≈ 0.34**) with different code. Tuning and ensembles add very little: **the limit is the information in the data**, not the model.
+- **Population density** is by far the most important feature (about 4–5× more than the next, motorcycle). The official urbanisation works almost as well, but adds nothing on top of density, so it is used to explain results, not in the model.
+- **Calibrated:** mean predicted risk 15.6 % vs observed 15.7 %, all groups within about 1.3 percentage points.
+- **Cities:** with one national threshold the model finds most severe accidents in rural areas (86 of 100) but only about 1 in 3 in cities.
+- *Reference only:* a comparable gradient boosting model that also uses accident kind and type (not usable for prevention) reaches validation F1 0.375 (Micheal's notebook).
 
----
+## Recommendations
 
-### 2. Add Collaborators (Pairs/Groups Only)
+1. **Prioritise rural roads**, especially for motorcycles: speed limits, safer curves and targeted campaigns.
+2. **Use the model as a risk ranking**, not a yes/no decision; cities need their own threshold or model.
+3. **Add the missing data:** road type and speed limits (e.g. OpenStreetMap) and several years of accidents.
 
-If working with teammates:
+**Data product idea:** a risk explorer for road planners: choose a place, time and road users and get the calibrated probability of a severe outcome, shown as a risk map, for targeted campaigns or live warnings in navigation apps.
 
-1. Open the repository on GitHub
-2. Go to **Settings → Collaborators**
-3. Add your teammates as collaborators
-4. Share the repository link with your team
+**Limits:** the Unfallatlas does not record speed, road type, helmet or seatbelt use; density describes the whole municipality, not the road; one year only, random split.
 
-Teammates should accept the invitation before continuing.
+## Repository Structure
 
----
+| File | Owner | Content |
+|---|---|---|
+| `Micheal_ML_Random_Forest_Rangers_Final.ipynb` | Micheal | Team notebook: business case, EDA, baselines, three models, tuning, ensembles, ablation, calibration, error analysis, post-accident reference |
+| `Micheal_Accident_Locations_2025_ML_Project.ipynb` | Micheal | First EDA and baseline model |
+| `zb01.ipynb` | Zina | EDA and merge of Unfallatlas with Destatis municipality data → shared dataset |
+| `zb02.ipynb` | Zina | Population by state and age (Destatis GENESIS) |
+| `zb03.ipynb` | Zina | First Scenario C models and the effect of population density |
+| `zb04.ipynb` | Zina | State-level EDA: population, age groups, urbanisation, accident kinds |
+| **`zb05.ipynb`** | Zina | **Final model:** urbanisation vs density, baselines, four models, tuning, calibration, error analysis and the final test |
+| `01_jishnu_EDA02.ipynb` | Jishnu | Detailed EDA |
+| `Jishnu_eda_baseline.ipynb` | Jishnu | EDA and historical scenario baseline |
+| `02_jishnu_modeling.ipynb`, `03_jishnu_modeling.ipynb` | Jishnu | Probability models, tuning, calibration, error analysis |
+| `tiziano_eda.ipynb` | Tiziano | EDA on the raw data |
+| `tiziano_splits.ipynb` | Tiziano | Train / validation / test split (70 / 15 / 15) → `data/splits/` |
+| `tiziano_baselines.ipynb` | Tiziano | Linear baselines |
+| `tiziano_ensembles.ipynb` | Tiziano | Bagging, boosting, voting and stacking |
+| `tiziano_augmented.ipynb` | Tiziano | Educated guesses for speed, road type, helmet and seatbelt |
+| `tiziano_pca.ipynb` | Tiziano | PCA before gradient boosting |
+| `presentation/` | | Slide deck for the 10-minute presentation |
+| `data/` | | Raw and processed data, splits |
+| `models/` | | Saved model from Micheal's notebook |
+| `results/` | | Saved tuning and ablation results |
+| `01_assignment.md`, `02_kanban_board.md`, `03_eda-and-modeling.ipynb` | | Course template files |
 
-### 3. Clone the Repository
+## Setup and Reproduction
 
-Copy the SSH URL from the **Code** button on GitHub, then run:
+Requires Python 3.13 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone <copied-ssh-url>
-```
-
-The copied SSH URL will look like `git@github.com:<your-username>/<repo-name>.git`.
-
----
-
-### 4. Move into the Project Folder and Install Dependencies
-
-This installs all dependencies and creates a virtual environment in (`.venv/`).
-
-```bash
-cd <repo-name>
+git clone https://github.com/zinaF19/The-Random-Forest-Rangers.git
+cd The-Random-Forest-Rangers
 uv sync
-```
-
-> [!TIP]
-> This is your own project, so you will add libraries as you go. Install a new package with `uv add <package>` (for example `uv add xgboost`). It updates `pyproject.toml` and `uv.lock` for the whole team.
-
----
-
-### 5. Open the Notebook
-
-> [!NOTE]
-> Make sure you open VS Code from the project root so it automatically detects the environment created by `uv sync`.
-
-Launch VS Code in the project root folder:
-
-```bash
 code .
 ```
 
-Then open `03_eda-and-modeling.ipynb` and select the Python environment created by `uv sync` as the kernel.
-
-## Handling Merge Conflicts in Notebooks
-
-When working in a team, `.ipynb` files can cause messy merge conflicts because they are JSON based. The `nbdime` tool makes this easier, and `uvx` runs it without adding it to your project dependencies.
-
-Enable the git integration once:
-
-```bash
-uvx nbdime config-git --enable
-```
-
-When a conflict happens, open the merge tool:
-
-```bash
-uvx nbdime mergetool
-```
-
-A web interface opens showing both notebook versions side by side. Choose what to keep, save, and close the tool, then:
-
-```bash
-git add your_notebook.ipynb
-git commit -m "Resolve notebook conflict"
-```
-
-> [!TIP]
-> When working with notebooks, it's a good idea to clear outputs before committing to reduce the chances of conflicts. You can do this in VS Code with the command palette: `Notebook: Clear All Outputs`.
-
-## References & Further Reading
-
-- [**scikit-learn Documentation**](https://scikit-learn.org/stable/): the library used for modelling, with user guides and examples.
-- [**Choosing the Right Estimator**](https://scikit-learn.org/stable/machine_learning_map.html): a visual map for picking a model based on your problem and data.
-- [**PEP 8 Style Guide for Python Code**](https://peps.python.org/pep-0008/): the style your notebook should follow.
-- [**Jupyter Notebooks in VS Code**](https://code.visualstudio.com/docs/datascience/jupyter-notebooks): how to run notebooks and pick a kernel in VS Code.
-- [**uv Documentation**](https://docs.astral.sh/uv/): the package manager that handles Python and dependencies for this repo.
-- [**Zindi Competitions**](https://zindi.africa/competitions): real-world challenges, several of which are listed as project options in the assignment.
+Open the notebooks from the project root and select the `.venv` kernel. To reproduce the final result, run `zb05.ipynb` (it uses `data/accidents_2025_with_population.csv`, `data/city_accidents_2025.csv` and `data/splits/`; about 30 minutes). The final test runs only with `RUN_TEST = True`.
